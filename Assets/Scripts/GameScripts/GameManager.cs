@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -8,7 +9,8 @@ public class GameManager : MonoBehaviour
     public PlayerBird player;
     public ObjectPoolManager pool;
     public float enemy_period;
-    HashSet<EnemyObject> active_Enemies = new();
+    List<EnemyObject> activeEnemies = new();
+    List<EnemyObject> deAvtiveEnemies = new();
     bool start = false;
 
 
@@ -21,36 +23,44 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-
+        player.onGameOver += GameOver;
     }
-
-    void Update()
+    private void GameOver()
     {
-        if(Input.GetKeyDown(KeyCode.Space))
+        SceneManager.LoadScene(1);
+    }
+    public void Button()
+    {
+        if(!start)
         {
-            if(!start)
+            InvokeRepeating("GetEnemy",0.0f, enemy_period);
+            player.FirstTap();
+            start = true;
+        }
+        else
+        {
+            player.Tap();
+        }
+        foreach (EnemyObject enemy in activeEnemies)
+        {
+            if (enemy.transform.position.x <= enemy.posX_min)
             {
-                InvokeRepeating("GetEnemy",0.0f,enemy_period);
-                //player.FirstTap();
-                player.Tap();
-                start = true;
-            }
-            else
-            {
-                player.Tap();
+                deAvtiveEnemies.Add(enemy);
+                break;
             }
         }
-        foreach(EnemyObject obj in active_Enemies)
+        foreach(EnemyObject enemy in deAvtiveEnemies)
         {
-            if(obj.transform.position.x <= obj.posX_min)
-            {
-                pool.Return(obj);
-            }
+            activeEnemies.Remove(enemy);
+            pool.Return(enemy);
         }
+        deAvtiveEnemies.Clear();
     }
 
     void GetEnemy()
     {
-        active_Enemies.Add(pool.Get(EnemyObject.E_ObjectType.Enemy,Vector3.zero,Quaternion.identity));
+        EnemyObject obj = pool.Get(BaseObject.E_ObjectType.Enemy) as EnemyObject;
+        obj.SetRandomPos();
+        activeEnemies.Add(obj);
     }
 }

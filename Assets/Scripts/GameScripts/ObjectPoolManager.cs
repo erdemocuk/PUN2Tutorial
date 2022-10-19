@@ -25,15 +25,41 @@ public class ObjectPoolManager : MonoBehaviour
         }
     }
 
-    public EnemyObject Get(EnemyObject.E_ObjectType objectType , Vector3 pos, Quaternion q)
+    public BaseObject Get(BaseObject.E_ObjectType objectType)
     {
         foreach (ObjectPooler objectPool in objectPoolSet)
         {
             if (objectPool.item.baseObject.ObjectType == objectType)
             {
-                EnemyObject new_object = objectPool.Get();
+                BaseObject new_object = objectPool.Get();
+                new_object.gameObject.SetActive(true);
+                return new_object;
+            }
+        }
+        return null; //Error!
+    }
+    public BaseObject Get(BaseObject.E_ObjectType objectType, Vector3 pos)
+    {
+        foreach (ObjectPooler objectPool in objectPoolSet)
+        {
+            if (objectPool.item.baseObject.ObjectType == objectType)
+            {
+                BaseObject new_object = objectPool.Get();
                 new_object.transform.position = pos;
-                new_object.transform.rotation = q;
+                new_object.gameObject.SetActive(true);
+                return new_object;
+            }
+        }
+        return null; //Error!
+    }
+    public BaseObject Get(BaseObject.E_ObjectType objectType, Vector3 pos, Quaternion q)
+    {
+        foreach (ObjectPooler objectPool in objectPoolSet)
+        {
+            if (objectPool.item.baseObject.ObjectType == objectType)
+            {
+                BaseObject new_object = objectPool.Get();
+                new_object.transform.SetPositionAndRotation(pos, q);
                 new_object.gameObject.SetActive(true);
                 return new_object;
             }
@@ -41,7 +67,7 @@ public class ObjectPoolManager : MonoBehaviour
         return null; //Error!
     }
 
-    public void Return(EnemyObject gameObject)
+    public void Return(BaseObject gameObject)
     {
         foreach (ObjectPooler objectPool in objectPoolSet)
         {
