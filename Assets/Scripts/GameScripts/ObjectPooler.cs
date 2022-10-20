@@ -2,57 +2,60 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[System.Serializable]
-public class ObjectPoolItem
+public class ObjectPooler<T> where T: MonoBehaviour
 {
-    public BaseObject baseObject;
-    public int amount;
-}
-
-public class ObjectPooler
-{
-    public ObjectPoolItem item;
-    public GameObject baseObject;
+    private T objPrefab;
+    private int amount;
+    private GameObject parentObject;
     bool shouldExpand = false;
-    Queue<BaseObject> pool;
+    Queue<T> pool;
 
-    public void InitPool()
+    ObjectPooler<T>(T objPrefab, int amount, GameObject parentObject)
+    {
+        this.objPrefab = objPrefab;
+        this.amount = amount;
+        this.parentObject = parentObject;
+        InitPool();
+    }
+    private void InitPool()
     {        
-        pool = new Queue<BaseObject>();
-        for (int i = 0; i < item.amount; i++)
+        pool = new Queue<T>();
+        for (int i = 0; i < amount; i++)
         {
-            BaseObject gameObject = Object.Instantiate(item.baseObject);
-            gameObject.gameObject.SetActive(false);
-            gameObject.transform.parent = baseObject.transform;
-            pool.Enqueue(gameObject);
+            T newObj = Object.Instantiate(objPrefab);
+            newObj.gameObject.SetActive(false);
+            newObj.transform.parent = parentObject.transform;
+            pool.Enqueue(newObj);
         }
     }
-
-    public BaseObject Get()
+    public T GetObjPrefab()
+    {
+        return objPrefab;
+    }
+    public T Get()
     {
         if (!shouldExpand)
         {
-            BaseObject gameObject = pool.Dequeue();
+            T obj = pool.Dequeue();
             if (pool.Count == 0)
             {
                 shouldExpand = true;
             }
-            return gameObject;
+            return obj;
         }
         else
         {
-            BaseObject gameObject = Object.Instantiate(item.baseObject);
-            gameObject.gameObject.SetActive(false);
-            gameObject.transform.parent = baseObject.transform;
-            item.amount++;
-            return gameObject;
+            T newObj = Object.Instantiate(objPrefab);
+            newObj.gameObject.SetActive(false);
+            newObj.transform.parent = parentObject.transform;
+            return newObj;
         }
     }
 
-    public void Return(BaseObject gameObject)
+    public void Return(T obj)
     {
-        gameObject.transform.parent = baseObject.transform;
-        pool.Enqueue(gameObject);
+        gameObject.transform.parent = parentObject.transform;
+        pool.Enqueue(obj);
         shouldExpand = false;
     }
 }

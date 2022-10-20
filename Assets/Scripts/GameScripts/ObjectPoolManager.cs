@@ -2,81 +2,87 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum E_PoolObjectTypes { }
+public interface IPoolable
+{
+    E_PoolObjectTypes objectType;
+} 
+[System.Serializable]
+public class ObjectPoolItem
+{
+    public IPoolable objPrefab;
+    public int amount;
+}
+
 public class ObjectPoolManager : MonoBehaviour
 {
     public List<ObjectPoolItem> ObjectPoolItems;
-    HashSet<ObjectPooler> objectPoolSet;
+    HashSet<ObjectPooler<IPoolable>> objectPoolSet;
 
     private void Start()
     {
-        objectPoolSet = new HashSet<ObjectPooler>();
-        GameObject gameObject = new();
-        gameObject.name = "Objects";
-        gameObject.transform.parent = this.transform;
+        objectPoolSet = new HashSet<ObjectPooler<IPoolable>>();
+        GameObject parentObject = new();
+        parentObject.name = "Objects";
+        parentObject.transform.parent = transform;
         foreach (ObjectPoolItem objectPoolItem in ObjectPoolItems)
         {
-            ObjectPooler newPool = new()
-            {
-                item = objectPoolItem,
-                baseObject = gameObject
-            };
-            newPool.InitPool();
-            objectPoolSet.Add(newPool);
+            objectPoolSet.Add(new ObjectPooler<IPoolable>(objectPoolItem.objPrefab, objectPoolItem.amount, parentObject));
         }
     }
 
-    public BaseObject Get(BaseObject.E_ObjectType objectType)
+    public IPoolable Get(E_PoolObjectTypes objectType)
     {
-        foreach (ObjectPooler objectPool in objectPoolSet)
+        foreach (ObjectPooler<IPoolable> objectPool in objectPoolSet)
         {
-            if (objectPool.item.baseObject.ObjectType == objectType)
+            if (objectPool.GetObjPrefab().objectType == objectType)
             {
-                BaseObject new_object = objectPool.Get();
-                new_object.gameObject.SetActive(true);
-                return new_object;
+                IPoolable newObj = objectPool.Get();
+                newObj.gameObject.SetActive(true);
+                return newObj;
             }
         }
         return null; //Error!
     }
-    public BaseObject Get(BaseObject.E_ObjectType objectType, Vector3 pos)
+    public IPoolable Get(E_PoolObjectTypes objectType, Vector3 pos)
     {
-        foreach (ObjectPooler objectPool in objectPoolSet)
+        foreach (ObjectPooler<IPoolable> objectPool in objectPoolSet)
         {
-            if (objectPool.item.baseObject.ObjectType == objectType)
+            if (objectPool.GetObjPrefab().objectType == objectType)
             {
-                BaseObject new_object = objectPool.Get();
-                new_object.transform.position = pos;
-                new_object.gameObject.SetActive(true);
-                return new_object;
+                IPoolable newObj = objectPool.Get();
+                newObj.transform.position = pos;
+                newObj.gameObject.SetActive(true);
+                return newObj;
             }
         }
         return null; //Error!
     }
-    public BaseObject Get(BaseObject.E_ObjectType objectType, Vector3 pos, Quaternion q)
+    public IPoolable Get(E_PoolObjectTypes objectType, Vector3 pos, Quaternion q)
     {
-        foreach (ObjectPooler objectPool in objectPoolSet)
+        foreach (ObjectPooler<IPoolable> objectPool in objectPoolSet)
         {
-            if (objectPool.item.baseObject.ObjectType == objectType)
+            if (objectPool.GetObjPrefab().objectType == objectType)
             {
-                BaseObject new_object = objectPool.Get();
-                new_object.transform.SetPositionAndRotation(pos, q);
-                new_object.gameObject.SetActive(true);
-                return new_object;
+                IPoolable newObj = objectPool.Get();
+                newObj.transform.SetPositionAndRotation(pos, q);
+                newObj.gameObject.SetActive(true);
+                return newObj;
             }
         }
         return null; //Error!
     }
 
-    public void Return(BaseObject gameObject)
+    public void Return(IPoolable obj)
     {
-        foreach (ObjectPooler objectPool in objectPoolSet)
+        foreach (ObjectPooler<IPoolable> objectPool in objectPoolSet)
         {
-            if (objectPool.item.baseObject.ObjectType == gameObject.ObjectType)
+            if (objectPool.GetObjPrefab().objectType == gameObject.ObjectType)
             {
                 // Reset all data to Prefab
-                gameObject.gameObject.SetActive(false);
-                gameObject.transform.position = this.transform.position;
-                gameObject.transform.rotation = this.transform.rotation;
+                obj.gameObject.SetActive(false);
+                obj.transform.position = transform.position;
+                obj.transform.rotation = transform.rotation;
                 objectPool.Return(gameObject);
             }
         }        
