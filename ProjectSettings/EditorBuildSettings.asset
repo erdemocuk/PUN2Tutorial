@@ -9,6 +9,9 @@ EditorBuildSettings:
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
-    path: Assets/Scenes/Game.unity
+    path: Assets/Scenes/Pong.unity
+    guid: e5fc157f531cdd94c9b10850c701f05e
+  - enabled: 0
+    path: Assets/Scenes/FlappyBird.unity
     guid: deb30174583224e0f9bb2b7590fcf1c1
   m_configObjects: {}
