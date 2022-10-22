@@ -5,19 +5,12 @@ using Photon.Pun;
 using UnityEngine.SceneManagement;
 using System.IO;
 
-public class RoomManager : MonoBehaviourPunCallbacks
+public class RoomManager : SingletonPUN<RoomManager>
 {
-    public static RoomManager instance;
-    private void Awake()
+    protected override void Awake()
     {
-        if (instance)
-        {
-            Destroy(gameObject);
-            return;
-        }
+        base.Awake();
         DontDestroyOnLoad(gameObject);
-        instance = this;
-
     }
 
     public override void OnEnable()

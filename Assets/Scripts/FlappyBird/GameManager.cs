@@ -2,24 +2,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-
-public class GameManager : MonoBehaviour
+public class GameManager : Singleton<GameManager>
 {
     public static GameManager instance;
+
     public Button button;
     public ObjectPoolingSystem pool;
     public float enemy_period;
 
     readonly List<EnemyObject> activeEnemies = new();
     readonly List<EnemyObject> deAvtiveEnemies = new();
-
-    // State Machine Kurulabilir !
-
-    void Awake()
-    {
-        instance = this;
-    }
-
     void Update()
     {
         foreach (EnemyObject enemy in activeEnemies)

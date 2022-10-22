@@ -5,13 +5,12 @@ using Photon.Pun;
 
 public class PlayerPong: MonoBehaviour
 {
+    GameManagerPong gmPong;
     PhotonView pw;
-
-    TMPro.TextMeshProUGUI text;
 
     void Start()
     {
-        text = GameObject.Find("Canvas/InfoText").GetComponent<TMPro.TextMeshProUGUI>();
+        gmPong = GameManagerPong.Instance;
         pw = GetComponent<PhotonView>();
 
         if(pw.IsMine)
@@ -19,11 +18,15 @@ public class PlayerPong: MonoBehaviour
             if(PhotonNetwork.IsMasterClient)
             {
                 transform.position = new Vector3(0,-8,0);
-                InvokeRepeating("PlayerControl",0,0.5f);
             }
             else
             {
+                Camera cam = GameObject.Find("Main Camera").GetComponent<Camera>();
+                cam.transform.Rotate(new Vector3(0, 0, 180));
                 transform.position = new(0,8,0);
+                gmPong.masterScoreText.rectTransform.sizeDelta = new Vector2(500,500);
+                gmPong.clientScoreText.rectTransform.sizeDelta = new Vector2(500, -500);
+
             }
         }
     }
@@ -67,26 +70,5 @@ public class PlayerPong: MonoBehaviour
 
             transform.position = curPosition;
         }
-    }
-    void Move()
-    {
-        float x = Input.GetAxis("Mouse X") * 20;//Time.deltaTime * 20;
-        transform.Translate(x,transform.position.y,0);
-    }
-
-    void PlayerControl()
-    {
-        if (PhotonNetwork.PlayerList.Length == 2)
-        {
-            pw.RPC("ClearScreen", RpcTarget.All,null);
-            GameObject.Find("Ball").GetComponent<PhotonView>().RPC("StartGame", RpcTarget.All, null);
-            CancelInvoke("PlayerControl");
-        }
-    }
-
-    [PunRPC]
-    public void ClearScreen()
-    {
-        text.text = null;
     }
 }
